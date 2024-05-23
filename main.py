@@ -4,7 +4,21 @@ from configs import OAI_MODEL, EXPORT_DIR
 from utils import export_current_conversation # num_tokens_from_messages
 from datetime import datetime
 
-st.title("챗봇 답변 요약 정도에 따른 문제풀이 사용성 테스트")
+# st.title("챗봇 답변 요약 정도에 따른 문제풀이 사용성 테스트")
+# CSS 스타일 정의
+st.markdown(
+    """
+    <style>
+    .custom-title {
+        font-size: 31px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# 타이틀 추가
+st.markdown('<h1 class="custom-title">챗봇 답변 요약 정도에 따른 문제풀이 사용성 테스트</h1>', unsafe_allow_html=True)
 st.subheader("3조: 김예원, 구민서, 이효림, 함영욱")
 
 if "openai_model" not in st.session_state:
