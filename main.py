@@ -18,7 +18,7 @@ st.markdown(
 )
 
 # 타이틀 추가
-st.markdown('<h1 class="custom-title">챗봇 답변 요약 정도에 따른 문제풀이 사용성 테스트</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="custom-title">챗봇 기반 문제풀이 사용성 테스트</h1>', unsafe_allow_html=True)
 st.subheader("3조: 김예원, 구민서, 이효림, 함영욱")
 
 if "openai_model" not in st.session_state:
@@ -48,7 +48,7 @@ if "solve_problem_time_stamp" not in st.session_state:
     st.session_state.solve_problem_time_stamp = []
 
 summary_level = st.sidebar.selectbox(
-    "챗봇 답변의 요약 정도",
+    "챗봇 선택",
     ("A", "B", "C"),
     index=None,
     placeholder="Select summary level...",
