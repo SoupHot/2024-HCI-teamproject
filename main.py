@@ -30,6 +30,9 @@ if "messages" not in st.session_state:
 if "messages_time_stamp" not in st.session_state: # 채팅 입력, 챗봇 답변 시간을 측정
     st.session_state.messages_time_stamp = []
 
+if "total_messages" not in st.session_state:
+    st.session_state.total_messages = []
+
 if "user_answers" not in st.session_state: # 채팅 입력, 챗봇 답변 시간을 측정
     st.session_state.user_answers = []
 
@@ -43,13 +46,13 @@ if "solve_problem_time_stamp" not in st.session_state:
 
 summary_level = st.sidebar.selectbox(
     "챗봇 답변의 요약 정도",
-    ("상", "중", "하"),
+    ("A", "B", "C"),
     index=None,
     placeholder="Select summary level...",
 )
 
 persona_description = ""
-if summary_level == "상":
+if summary_level == "A":
     st.sidebar.success('선택 완료!', icon="✅")
     persona_description = """
         문제를 풀어주는 챗봇
@@ -61,7 +64,7 @@ if summary_level == "상":
         문제 : ERP를 보완하기 위해 만들어진 개념으로 기업 내 생산계획의 최적화를 넘어 전체 공급망 내 자원의 최적화를 목표로 하는 시스템은?
         답 : APS
         """
-elif summary_level == "중":
+elif summary_level == "B":
     st.sidebar.success('선택 완료!', icon="✅")
     persona_description = """
         문제를 풀어주는 챗봇
@@ -73,7 +76,7 @@ elif summary_level == "중":
         답 : APS(Advanced Planning and Scheduling, 고급 계획 및 일정 관리)는 ERP 시스템을 보완하는 시스템으로, 기업 내 생산 계획의 최적화를 넘어 전체 공급망 내 자원의 최적화를 목표로 합니다. APS는 고급 알고리즘을 사용해 생산 일정, 자재 조달, 용량 계획 등을 최적화하여 생산 효율성을 높이고 비용을 절감하며, 고객 요구에 신속하게 대응할 수 있게 합니다.
         """
     
-elif summary_level == "하":
+elif summary_level == "C":
     st.sidebar.success('선택 완료!', icon="✅")
     persona_description = """
         문제를 풀어주는 챗봇
@@ -97,16 +100,10 @@ else:
 
 client = OpenAI(api_key=st.secrets["API_KEY"])
 
-# 버튼을 클릭했을 때 호출되는 함수
-def start_solving_button_click():
-    st.session_state.start_solving_button_clicked = True
-    st.session_state.end_solving_button_clicked = False
-    st.session_state.solve_problem_time_stamp.append({"state": "start", "time_stamp": datetime.now()})
-
-def end_solving_button_click():
-    st.session_state.end_solving_button_clicked = True
-    st.session_state.start_solving_button_clicked = False
-    st.session_state.solve_problem_time_stamp.append({"state": "end", "time_stamp": datetime.now()})
+def move_and_append(original_list, copied_list):
+  for element in original_list:
+    if element not in copied_list:
+      copied_list.append(element)
 
 # 버튼을 클릭했을 때 호출되는 함수
 def start_solving_button_click():
@@ -118,13 +115,14 @@ def end_solving_button_click():
     st.session_state.end_solving_button_clicked = True
     st.session_state.start_solving_button_clicked = False
     st.session_state.solve_problem_time_stamp.append({"state": "end", "time_stamp": datetime.now()})
+    move_and_append(st.session_state.messages, st.session_state.total_messages)
+    st.session_state.messages = [] # 정답 제출하면 그 동안의 프롬프트 초기화
 
 # 버튼 생성 및 클릭 여부에 따른 비활성화 처리
 if st.session_state.start_solving_button_clicked:
     st.sidebar.button("풀이 시작", disabled=True)
 else:
     st.sidebar.button("풀이 시작", on_click=start_solving_button_click)
-    # st.sidebar.success('시작!', icon="✅")
 
 if st.session_state.start_solving_button_clicked:
     with st.sidebar.form(key='end_solving_form'):
@@ -144,7 +142,7 @@ if st.session_state.start_solving_button_clicked:
 export_button = st.sidebar.button("결과물 다운로드")
 
 if export_button:
-    excel_file = export_current_conversation(st.session_state.messages, st.session_state.messages_time_stamp, st.session_state.solve_problem_time_stamp, st.session_state.user_answers)
+    excel_file = export_current_conversation(st.session_state.total_messages, st.session_state.messages_time_stamp, st.session_state.solve_problem_time_stamp, st.session_state.user_answers)
     st.sidebar.download_button(
         label="Download conversation as Excel",
         data=excel_file,
@@ -152,7 +150,7 @@ if export_button:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-st.sidebar.link_button("사용성 테스트 링크", "https://docs.google.com/forms/d/1Ckf-SXmMMVCK1oAfrxPcC6i6tNFMNAvbhBuQ4dCDZ1Y/edit?ts=664ad514")
+st.sidebar.link_button("사용성 테스트 링크", "https://forms.gle/kZnCupCi4Gt5sBDN9")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
