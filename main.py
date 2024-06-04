@@ -98,7 +98,7 @@ elif summary_level == "C":
         """
 
 else:
-    st.sidebar.warning('챗봇을을 선택해 주세요.', icon="⚠️")
+    st.sidebar.warning('챗봇을 선택해 주세요.', icon="⚠️")
     st.stop()
 
 client = OpenAI(api_key=st.secrets["API_KEY"])
