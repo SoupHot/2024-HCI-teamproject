@@ -51,7 +51,7 @@ summary_level = st.sidebar.selectbox(
     "챗봇 선택",
     ("A", "B", "C"),
     index=None,
-    placeholder="Select summary level...",
+    placeholder="Select chatbot...",
 )
 
 persona_description = ""
