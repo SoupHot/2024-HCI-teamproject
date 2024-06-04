@@ -3,7 +3,7 @@ import streamlit as st
 from configs import OAI_MODEL, EXPORT_DIR
 from utils import export_current_conversation # num_tokens_from_messages
 from datetime import datetime
-
+from time import sleep
 # st.title("챗봇 답변 요약 정도에 따른 문제풀이 사용성 테스트")
 # CSS 스타일 정의
 st.markdown(
@@ -29,6 +29,9 @@ if "messages" not in st.session_state:
 
 if "messages_time_stamp" not in st.session_state: # 채팅 입력, 챗봇 답변 시간을 측정
     st.session_state.messages_time_stamp = []
+
+if "user_answers" not in st.session_state: # 채팅 입력, 챗봇 답변 시간을 측정
+    st.session_state.user_answers = []
 
 # 세션 상태 초기화
 if "start_solving_button_clicked" not in st.session_state:
@@ -92,8 +95,18 @@ else:
     st.sidebar.warning('챗봇 답변의 요약 정도를 선택해 주세요.', icon="⚠️")
     st.stop()
 
-
 client = OpenAI(api_key=st.secrets["API_KEY"])
+
+# 버튼을 클릭했을 때 호출되는 함수
+def start_solving_button_click():
+    st.session_state.start_solving_button_clicked = True
+    st.session_state.end_solving_button_clicked = False
+    st.session_state.solve_problem_time_stamp.append({"state": "start", "time_stamp": datetime.now()})
+
+def end_solving_button_click():
+    st.session_state.end_solving_button_clicked = True
+    st.session_state.start_solving_button_clicked = False
+    st.session_state.solve_problem_time_stamp.append({"state": "end", "time_stamp": datetime.now()})
 
 # 버튼을 클릭했을 때 호출되는 함수
 def start_solving_button_click():
@@ -113,17 +126,26 @@ else:
     st.sidebar.button("풀이 시작", on_click=start_solving_button_click)
     # st.sidebar.success('시작!', icon="✅")
 
-if st.session_state.end_solving_button_clicked:
-    st.sidebar.button("풀이 완료", disabled=True)
-else:
-    st.sidebar.button("풀이 완료", on_click=end_solving_button_click)
-    # st.sidebar.success('완료!', icon="✅")
+if st.session_state.start_solving_button_clicked:
+    with st.sidebar.form(key='end_solving_form'):
+        # 텍스트 입력란
+        end_solving_text = st.text_input("정답 입력", key='end_solving_text')
+        st.session_state.user_answers.append(end_solving_text)
+        # 제출 버튼
+        submit_button = st.form_submit_button(label='제출')
+        # 제출 버튼이 클릭되었을 때 end_solving_button_click 함수 호출
+        if submit_button:
+            if end_solving_text:  # 텍스트가 입력되었는지 확인
+                end_solving_button_click()
+                with st.empty():
+                    st.sidebar.success('정답이 제출되었습니다.', icon="✅")
+                    sleep(1)
+                st.rerun()
 
-# 엑셀 파일 생성 및 다운로드 버튼 추가 (풀이 완료 후 활성화)
 export_button = st.sidebar.button("결과물 다운로드")
 
 if export_button:
-    excel_file = export_current_conversation(st.session_state.messages, st.session_state.messages_time_stamp, st.session_state.solve_problem_time_stamp)
+    excel_file = export_current_conversation(st.session_state.messages, st.session_state.messages_time_stamp, st.session_state.solve_problem_time_stamp, st.session_state.user_answers)
     st.sidebar.download_button(
         label="Download conversation as Excel",
         data=excel_file,
@@ -159,6 +181,3 @@ if st.session_state.start_solving_button_clicked:
             message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.session_state.messages_time_stamp.append({"role": "assistant", "time_stamp": datetime.now()}) # 챗봇 문장 답변 시간
-
-# Use st.markdown with inline HTML styling to change text color
-# st.markdown(f"<span style='color:red'>Total tokens used till now in conversation (your input + model's output): {num_tokens_from_messages(st.session_state.messages, OAI_MODEL)}</span>", unsafe_allow_html=True)

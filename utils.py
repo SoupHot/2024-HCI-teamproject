@@ -19,7 +19,7 @@ import io
 
 #     return os.path.join(EXPORT_DIR, export_file_name + EXPORT_FILE_EXTENSION)
 
-def export_current_conversation(messages: list[dict], messages_time_stamp: list[dict], solve_problem_time_stamp: list[dict]):
+def export_current_conversation(messages: list[dict], messages_time_stamp: list[dict], solve_problem_time_stamp: list[dict], user_answers: list[str]):
     # 파일 경로 생성 함수가 필요 없으므로 제거합니다.
     # export_file_path = get_export_file_path()
     
@@ -27,6 +27,7 @@ def export_current_conversation(messages: list[dict], messages_time_stamp: list[
     messages_df = pd.DataFrame(messages)
     messages_time_stamp_df = pd.DataFrame(messages_time_stamp)
     solve_problem_time_stamp_df = pd.DataFrame(solve_problem_time_stamp)
+    user_answers_df = pd.DataFrame(user_answers)
     
     # 메시지와 타임스탬프를 하나의 데이터프레임으로 결합
     combined_df = pd.concat([messages_df, messages_time_stamp_df], axis=1)
@@ -37,6 +38,7 @@ def export_current_conversation(messages: list[dict], messages_time_stamp: list[
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         combined_df.to_excel(writer, index=False, sheet_name='Messages')
         solve_problem_time_stamp_df.to_excel(writer, index=False, sheet_name='Problem Time Stamps')
+        user_answers_df.to_excel(writer, index=False, sheet_name='Problem User Answers')
     
     # BytesIO 객체를 반환하기 전에 포인터를 처음으로 되돌립니다.
     output.seek(0)
