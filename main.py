@@ -130,17 +130,16 @@ if st.session_state.start_solving_button_clicked:
     with st.sidebar.form(key='end_solving_form'):
         # 텍스트 입력란
         end_solving_text = st.text_input("정답 입력", key='end_solving_text')
-        st.session_state.user_answers.append(end_solving_text)
         # 제출 버튼
         submit_button = st.form_submit_button(label='제출')
         # 제출 버튼이 클릭되었을 때 end_solving_button_click 함수 호출
-        if submit_button:
-            if end_solving_text:  # 텍스트가 입력되었는지 확인
-                end_solving_button_click()
-                with st.empty():
-                    st.sidebar.success('정답이 제출되었습니다.', icon="✅")
-                    sleep(1)
-                st.rerun()
+        if submit_button and end_solving_text:
+            st.session_state.user_answers.append(end_solving_text)
+            end_solving_button_click()
+            with st.empty():
+                st.sidebar.success('정답이 제출되었습니다.', icon="✅")
+                sleep(1)
+            st.rerun()
 
 export_button = st.sidebar.button("결과물 다운로드")
 
