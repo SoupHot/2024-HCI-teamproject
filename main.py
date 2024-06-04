@@ -33,6 +33,9 @@ if "messages_time_stamp" not in st.session_state: # 채팅 입력, 챗봇 답변
 if "total_messages" not in st.session_state:
     st.session_state.total_messages = []
 
+if "total_messages_time_stamp" not in st.session_state:
+    st.session_state.total_messages_time_stamp = []
+
 if "user_answers" not in st.session_state: # 채팅 입력, 챗봇 답변 시간을 측정
     st.session_state.user_answers = []
 
@@ -116,7 +119,9 @@ def end_solving_button_click():
     st.session_state.start_solving_button_clicked = False
     st.session_state.solve_problem_time_stamp.append({"state": "end", "time_stamp": datetime.now()})
     move_and_append(st.session_state.messages, st.session_state.total_messages)
+    move_and_append(st.session_state.messages_time_stamp, st.session_state.total_messages_time_stamp)
     st.session_state.messages = [] # 정답 제출하면 그 동안의 프롬프트 초기화
+    st.session_state.messages_time_stamp = []
 
 # 버튼 생성 및 클릭 여부에 따른 비활성화 처리
 if st.session_state.start_solving_button_clicked:
@@ -142,7 +147,7 @@ if st.session_state.start_solving_button_clicked:
 export_button = st.sidebar.button("결과물 다운로드")
 
 if export_button:
-    excel_file = export_current_conversation(st.session_state.total_messages, st.session_state.messages_time_stamp, st.session_state.solve_problem_time_stamp, st.session_state.user_answers)
+    excel_file = export_current_conversation(st.session_state.total_messages, st.session_state.total_messages_time_stamp, st.session_state.solve_problem_time_stamp, st.session_state.user_answers)
     st.sidebar.download_button(
         label="Download conversation as Excel",
         data=excel_file,
